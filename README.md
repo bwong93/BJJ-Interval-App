@@ -1,6 +1,6 @@
 # Shadow Rounds
 
-A solo wrestling interval timer for staying in grappling shape without a partner. Stay in stance, hit randomly called moves (sprawl, penetration step, double leg, single leg, snap-down, plus cardio bursts like tuck jumps and spin drills), recover, repeat.
+A solo wrestling interval timer for staying in grappling shape without a partner. Stay in stance, hit randomly called moves (sprawl, double leg, single leg, snap-down, plus cardio bursts like tuck jumps and spin drills), recover, repeat.
 
 A passion project built for fun, not for profit.
 

@@ -248,7 +248,7 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spac
 (() => {
   /* ---------- Standing / wrestling callouts ---------- */
   // Mix per call: ~55% singles, ~25% cardio bursts, ~20% combos. Each move holds on screen for `hold` seconds.
-  const SINGLES = ['Sprawl', 'Penetration step', 'Double leg', 'Single leg', 'Snap-down'].map(t => ({ t, hold: 2.2 }));
+  const SINGLES = ['Sprawl', 'Double leg', 'Single leg', 'Snap-down'].map(t => ({ t, hold: 2.2 }));
   const CARDIO  = [{ t: 'Tuck jump', hold: 2 }, { t: 'Sprawl and jump', hold: 3 }, { t: 'Sprawl to shot', hold: 3 }, { t: 'Fast feet', say: 'Fast feet, five seconds', hold: 5 }, { t: 'Spin drill', say: 'Spin drill, five seconds', hold: 5 }];
   const COMBOS  = ['Shot, sprawl', 'Fake shot, snap-down', 'Sprawl, re-shot', 'Level change, double leg'].map(t => ({ t, hold: 3 }));
   const IDLE_CUES = ['Circle, hand fight', 'Feet moving, stay low', 'Head up, hips under you', 'Pummel, look for an angle'];
