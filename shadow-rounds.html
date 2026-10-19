@@ -1,0 +1,551 @@
+<title>Shadow Rounds</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Saira+Condensed:wght@600;700;800&display=swap">
+<style>
+/* Layout: one narrow column of presets; a session takes the whole screen, readable from across the room. Dark-first. */
+:root {
+  --bg: #121527;        /* blue-gi navy */
+  --surface: #1b2037;
+  --line: #2d3454;
+  --fg: #eef0f7;
+  --muted: #9aa1bd;
+  --work: #f4a63a;      /* work + action = amber */
+  --rest: #45c4b0;      /* rest = teal */
+  --on-work: #1d1405;
+  --display: "Saira Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f2f3f8; --surface: #ffffff; --line: #d8dbe9; --fg: #151a30; --muted: #59607f;
+    --work: #c06a00; --rest: #0d8573; --on-work: #ffffff; color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f2f3f8; --surface: #ffffff; --line: #d8dbe9; --fg: #151a30; --muted: #59607f;
+  --work: #c06a00; --rest: #0d8573; --on-work: #ffffff; color-scheme: light;
+}
+
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--body); font-size: 16px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--work); outline-offset: 2px; }
+
+.wrap {
+  max-width: 560px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+  display: flex; flex-direction: column; gap: 22px;
+}
+
+/* Header */
+.brand { display: flex; align-items: center; gap: 10px; }
+.mark { width: 30px; height: 10px; border-radius: 2px; background: var(--fg); position: relative; flex: none; }
+.mark::after { content: ""; position: absolute; right: 5px; top: 0; bottom: 0; width: 7px; background: var(--work); }
+h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spacing: .01em; line-height: 1; margin: 0; text-transform: uppercase; }
+.sub { margin: 6px 0 0; color: var(--muted); }
+.eyebrow { font-family: var(--display); font-weight: 700; font-size: .95rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin: 0 0 10px; }
+
+/* How it works */
+.how { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.how div { border-top: 3px solid var(--line); padding-top: 8px; min-width: 0; }
+.how div:nth-child(2) { border-color: var(--work); }
+.how b { display: block; font-family: var(--display); font-weight: 700; font-size: 1.15rem; text-transform: uppercase; letter-spacing: .03em; line-height: 1.1; }
+.how span { color: var(--muted); font-size: .85rem; line-height: 1.35; display: block; margin-top: 4px; }
+
+/* Streak */
+.streak { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+.streak-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.big-num { font-family: var(--display); font-weight: 800; font-size: 2.2rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.label { color: var(--muted); font-size: .9rem; }
+.week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.day { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: .75rem; color: var(--muted); letter-spacing: .06em; }
+.dot { width: 100%; max-width: 36px; height: 10px; border-radius: 3px; background: var(--line); }
+.day.on .dot { background: var(--work); }
+.day.today { color: var(--fg); font-weight: 700; }
+.day.today .dot { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--fg); }
+
+/* Presets */
+.presets { display: flex; flex-direction: column; gap: 10px; }
+.preset {
+  display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center;
+  text-align: left; width: 100%; padding: 14px 16px; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+}
+.preset:hover { border-color: var(--muted); }
+.preset .name { font-family: var(--display); font-weight: 700; font-size: 1.45rem; line-height: 1.1; text-transform: uppercase; letter-spacing: .02em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.preset .meta { grid-column: 1; color: var(--muted); font-size: .9rem; font-variant-numeric: tabular-nums; }
+.preset .go { grid-row: 1 / span 2; grid-column: 2; width: 44px; height: 44px; border-radius: 50%; background: var(--work); color: var(--on-work); display: grid; place-items: center; }
+.preset .go svg { width: 16px; height: 16px; margin-left: 3px; }
+.chip { font-family: var(--body); font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--work); color: var(--work); }
+
+/* Custom builder */
+.custom { border: 1px solid var(--line); border-radius: 12px; padding: 0 16px; }
+.custom summary { cursor: pointer; padding: 14px 0; font-weight: 700; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+.custom summary::-webkit-details-marker { display: none; }
+.custom summary::after { content: "+"; font-family: var(--display); font-size: 1.6rem; line-height: 1; color: var(--muted); }
+.custom[open] summary::after { content: "–"; }
+.fields { display: flex; flex-direction: column; gap: 18px; padding-bottom: 18px; }
+.field > .flabel { font-size: .8rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: block; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.pick { position: relative; }
+.pick input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.pick span { display: inline-block; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); font-size: .95rem; pointer-events: none; }
+.pick input:checked + span { background: var(--fg); color: var(--bg); border-color: var(--fg); font-weight: 700; }
+.pick input:focus-visible + span { outline: 3px solid var(--work); outline-offset: 2px; }
+.steppers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.stepper { border: 1px solid var(--line); border-radius: 10px; padding: 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.stepper .val { font-family: var(--display); font-weight: 700; font-size: 1.6rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stepper .row { display: flex; gap: 6px; }
+.stepper button { width: 38px; height: 34px; border-radius: 8px; border: 1px solid var(--line); background: transparent; cursor: pointer; font-size: 1.2rem; line-height: 1; }
+.stepper .cap { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.est { color: var(--muted); font-size: .9rem; font-variant-numeric: tabular-nums; margin: 0; }
+
+.btn { border: 0; cursor: pointer; border-radius: 10px; padding: 14px 18px; font-weight: 700; font-size: 1rem; }
+.btn.primary { background: var(--work); color: var(--on-work); }
+.btn.ghost { background: transparent; border: 1.5px solid currentColor; }
+.note { color: var(--muted); font-size: .9rem; margin: 0; }
+
+/* Session screen */
+.session {
+  --phase: var(--fg);
+  position: fixed; inset: 0; z-index: 20;
+  background: color-mix(in srgb, var(--phase) 7%, var(--bg));
+  display: flex; flex-direction: column;
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  transition: background .25s;
+}
+.session[data-phase="work"] { --phase: var(--work); }
+.session[data-phase="rest"] { --phase: var(--rest); }
+.session[data-action="on"] { background: color-mix(in srgb, var(--work) 22%, var(--bg)); }
+.s-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.phase-pill { font-family: var(--display); font-weight: 800; font-size: 1.1rem; letter-spacing: .12em; text-transform: uppercase; background: var(--phase); color: var(--bg); padding: 4px 12px; border-radius: 6px; }
+.round { font-family: var(--display); font-weight: 700; font-size: 1.3rem; letter-spacing: .04em; font-variant-numeric: tabular-nums; color: var(--muted); }
+.round b { color: var(--fg); }
+.s-main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; text-align: center; min-height: 0; }
+.callout { font-family: var(--display); font-weight: 800; text-transform: uppercase; line-height: .95; font-size: clamp(2.6rem, 13vw, 6.5rem); text-wrap: balance; max-width: 14ch; overflow-wrap: anywhere; }
+.callout.idle { color: var(--muted); font-size: clamp(2rem, 9vw, 4.2rem); }
+.callout.action { color: var(--work); }
+.callout.pop { animation: pop .3s ease-out; }
+@keyframes pop { from { transform: scale(.92); opacity: .3; } to { transform: none; opacity: 1; } }
+.subcall { color: var(--muted); font-size: 1.1rem; margin: 0; min-height: 1.5em; max-width: 30ch; }
+.s-timer { font-family: var(--display); font-weight: 700; font-size: clamp(4rem, 24vw, 9rem); line-height: 1; text-align: center; font-variant-numeric: tabular-nums; color: var(--phase); }
+.bar { height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--phase) 22%, transparent); margin: 14px 0 18px; overflow: hidden; }
+.bar > div { height: 100%; width: 0; background: var(--phase); }
+.s-controls { display: flex; justify-content: center; }
+.s-controls .btn { min-width: 180px; padding: 16px 22px; font-size: 1.1rem; }
+
+.sheet { position: absolute; inset: 0; background: color-mix(in srgb, var(--bg) 92%, transparent); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 14px; padding: 24px; text-align: center; }
+.sheet h2 { font-family: var(--display); font-weight: 800; font-size: 3rem; text-transform: uppercase; margin: 0; }
+.sheet .btn { width: min(320px, 100%); }
+.sheet p { color: var(--muted); margin: 0 0 8px; }
+
+/* Done */
+.done-head { font-family: var(--display); font-weight: 800; font-size: 3rem; text-transform: uppercase; line-height: 1; margin: 12px 0 0; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+.stat .big-num { font-size: 2rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .callout.pop { animation: none; }
+  .session { transition: none; }
+}
+</style>
+
+<div id="home" class="wrap">
+  <header>
+    <div class="brand"><span class="mark" aria-hidden="true"></span><h1>Shadow Rounds</h1></div>
+    <p class="sub">Solo wrestling rounds with random callouts. Prop your phone up, tap a preset, move.</p>
+  </header>
+
+  <section class="how" aria-label="How a round works">
+    <div><b>Stay in stance</b><span>Circle, hand fight, keep your feet moving.</span></div>
+    <div><b>Hit the call</b><span>Explode into the move the moment you hear it.</span></div>
+    <div><b>Recover</b><span>Get back to stance fast. Repeat until time.</span></div>
+  </section>
+
+  <section class="streak" aria-label="This week">
+    <div class="streak-row">
+      <div><span id="streakNum" class="big-num">0</span> <span class="label">day streak</span></div>
+      <div class="label" id="weekCount">No sessions yet this week</div>
+    </div>
+    <div class="week" id="week"></div>
+  </section>
+
+  <section>
+    <h2 class="eyebrow">Presets</h2>
+    <div id="presets" class="presets"></div>
+  </section>
+
+  <details class="custom" id="customBox">
+    <summary>Build a custom session</summary>
+    <div class="fields">
+      <div class="field">
+        <span class="flabel">Timing</span>
+        <div class="steppers">
+          <div class="stepper"><span class="cap">Work</span><span class="val" id="workVal">2:00</span><div class="row"><button type="button" id="workDown" aria-label="Less work time">−</button><button type="button" id="workUp" aria-label="More work time">+</button></div></div>
+          <div class="stepper"><span class="cap">Rest</span><span class="val" id="restVal">1:00</span><div class="row"><button type="button" id="restDown" aria-label="Less rest time">−</button><button type="button" id="restUp" aria-label="More rest time">+</button></div></div>
+          <div class="stepper"><span class="cap">Rounds</span><span class="val" id="roundsVal">3</span><div class="row"><button type="button" id="roundsDown" aria-label="Fewer rounds">−</button><button type="button" id="roundsUp" aria-label="More rounds">+</button></div></div>
+        </div>
+      </div>
+      <div class="field">
+        <span class="flabel">Callout pace</span>
+        <div class="chips" id="paceChips"></div>
+      </div>
+      <p class="est" id="customEst"></p>
+      <button type="button" class="btn primary" id="startCustom">Start custom session</button>
+    </div>
+  </details>
+
+  <p class="note" id="voiceNote" hidden>Voice callouts aren't available in this browser, so callouts will show on screen only.</p>
+  <p class="note">Tip: turn the ringer on. Callouts play through the speaker, and the screen stays awake during a session where the browser allows it.</p>
+</div>
+
+<div id="session" class="session" data-phase="ready" hidden>
+  <div class="s-top">
+    <span id="sPhase" class="phase-pill">Get ready</span>
+    <span id="sRound" class="round">Round <b>1</b> / 3</span>
+  </div>
+  <div class="s-main">
+    <div id="sCall" class="callout" aria-live="polite">Get set</div>
+    <p id="sSub" class="subcall"></p>
+  </div>
+  <div class="s-timer" id="sTime">0:05</div>
+  <div class="bar"><div id="sBar"></div></div>
+  <div class="s-controls"><button type="button" id="pauseBtn" class="btn ghost">Pause</button></div>
+
+  <div id="pauseSheet" class="sheet" hidden>
+    <h2>Paused</h2>
+    <p id="pauseInfo">Ending now still logs the work you've done.</p>
+    <button type="button" class="btn primary" id="resumeBtn">Resume</button>
+    <button type="button" class="btn ghost" id="endBtn">End session</button>
+  </div>
+</div>
+
+<div id="done" class="wrap" hidden>
+  <h2 class="done-head" id="doneHead">Session logged</h2>
+  <p class="sub" id="doneSub"></p>
+  <div class="stats">
+    <div class="stat"><div class="big-num" id="dRounds">0</div><div class="label">rounds</div></div>
+    <div class="stat"><div class="big-num" id="dCalls">0</div><div class="label">moves hit</div></div>
+    <div class="stat"><div class="big-num" id="dStreak">0</div><div class="label">day streak</div></div>
+  </div>
+  <button type="button" class="btn primary" id="homeBtn">Back to presets</button>
+</div>
+
+<script>
+(() => {
+  /* ---------- Standing / wrestling callouts ---------- */
+  // Mix per call: ~55% singles, ~25% cardio bursts, ~20% combos. Each move holds on screen for `hold` seconds.
+  const SINGLES = ['Sprawl', 'Penetration step', 'Double leg', 'Single leg', 'Snap-down'].map(t => ({ t, hold: 2.2 }));
+  const CARDIO  = [{ t: 'Tuck jump', hold: 2 }, { t: 'Sprawl and jump', hold: 3 }, { t: 'Sprawl to shot', hold: 3 }, { t: 'Fast feet', say: 'Fast feet, five seconds', hold: 5 }, { t: 'Spin drill', say: 'Spin drill, five seconds', hold: 5 }];
+  const COMBOS  = ['Shot, sprawl', 'Fake shot, snap-down', 'Sprawl, re-shot', 'Level change, double leg'].map(t => ({ t, hold: 3 }));
+  const IDLE_CUES = ['Circle, hand fight', 'Feet moving, stay low', 'Head up, hips under you', 'Pummel, look for an angle'];
+
+  const PACE = {
+    chill:    { name: 'Chill',    gap: [10, 18], note: 'a move every 10–18 s' },
+    normal:   { name: 'Normal',   gap: [5, 10],  note: 'a move every 5–10 s' },
+    scramble: { name: 'Scramble', gap: [2.5, 5], note: 'a move every 2.5–5 s' }
+  };
+
+  const PRESETS = [
+    { id: 'match',  name: 'Match Rounds', work: 120, rest: 60, rounds: 3,  pace: 'normal' },
+    { id: 'shots',  name: 'Shot Sprints', work: 30,  rest: 30, rounds: 10, pace: 'scramble' },
+    { id: 'grind',  name: 'Long Grind',   work: 300, rest: 60, rounds: 3,  pace: 'chill' }
+  ];
+
+  /* ---------- Helpers ---------- */
+  const $ = id => document.getElementById(id);
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const fmt = s => { s = Math.max(0, Math.ceil(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+  const totalMin = c => Math.round((c.work * c.rounds + c.rest * (c.rounds - 1)) / 60);
+  const dayKey = d => d.toLocaleDateString('en-CA');
+  const store = {
+    get(k, fallback) { try { const v = localStorage.getItem('shadowrounds.' + k); return v ? JSON.parse(v) : fallback; } catch (e) { return fallback; } },
+    set(k, v) { try { localStorage.setItem('shadowrounds.' + k, JSON.stringify(v)); } catch (e) {} }
+  };
+
+  /* ---------- Streak + week ---------- */
+  function streakInfo() {
+    const log = store.get('log', []);
+    const days = new Set(log.map(s => s.date));
+    const d = new Date();
+    if (!days.has(dayKey(d))) d.setDate(d.getDate() - 1);
+    let streak = 0;
+    while (days.has(dayKey(d))) { streak++; d.setDate(d.getDate() - 1); }
+    return { log, days, streak };
+  }
+  function renderStreak() {
+    const { log, days, streak } = streakInfo();
+    $('streakNum').textContent = streak;
+    const now = new Date();
+    const monday = new Date(now); monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    const letters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    let html = '', weekSessions = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday); d.setDate(monday.getDate() + i);
+      const k = dayKey(d);
+      weekSessions += log.filter(s => s.date === k).length;
+      html += `<div class="day${days.has(k) ? ' on' : ''}${k === dayKey(now) ? ' today' : ''}"><span class="dot"></span>${letters[i]}</div>`;
+    }
+    $('week').innerHTML = html;
+    $('weekCount').textContent = weekSessions ? `${weekSessions} session${weekSessions > 1 ? 's' : ''} this week` : 'No sessions yet this week';
+  }
+
+  /* ---------- Home: presets ---------- */
+  const playIcon = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5v13L14 8z" fill="currentColor"/></svg>';
+  function renderPresets() {
+    const last = store.get('last', null);
+    const list = [...PRESETS].sort((a, b) => (b.id === last) - (a.id === last));
+    $('presets').innerHTML = list.map(p => `
+      <button type="button" class="preset" data-id="${p.id}">
+        <span class="name">${p.name}${p.id === last ? '<span class="chip">Last used</span>' : ''}</span>
+        <span class="meta">${fmt(p.work)} work · ${fmt(p.rest)} rest · ${p.rounds} rounds · ~${totalMin(p)} min<br>${PACE[p.pace].name} pace, ${PACE[p.pace].note}</span>
+        <span class="go">${playIcon}</span>
+      </button>`).join('');
+  }
+  $('presets').addEventListener('click', e => {
+    const b = e.target.closest('.preset'); if (!b) return;
+    const p = PRESETS.find(x => x.id === b.dataset.id);
+    store.set('last', p.id);
+    start({ ...p });
+  });
+
+  /* ---------- Custom builder ---------- */
+  const saved = store.get('custom2', {});
+  const custom = Object.assign({ work: 120, rest: 60, rounds: 3, pace: 'normal' }, saved);
+  if (!PACE[custom.pace]) custom.pace = 'normal';
+  $('paceChips').innerHTML = Object.entries(PACE).map(([k, d]) => `<label class="pick"><input type="radio" name="pace" id="pace-${k}" value="${k}"${custom.pace === k ? ' checked' : ''}><span>${d.name}</span></label>`).join('');
+  const LIM = { work: [30, 600, 30], rest: [15, 180, 15], rounds: [1, 12, 1] };
+  function renderCustom() {
+    $('workVal').textContent = fmt(custom.work);
+    $('restVal').textContent = fmt(custom.rest);
+    $('roundsVal').textContent = custom.rounds;
+    $('customEst').textContent = `About ${totalMin(custom)} min total, ${PACE[custom.pace].note}.`;
+    store.set('custom2', custom);
+  }
+  ['work', 'rest', 'rounds'].forEach(k => {
+    const [lo, hi, step] = LIM[k];
+    $(k + 'Down').addEventListener('click', () => { custom[k] = Math.max(lo, custom[k] - step); renderCustom(); });
+    $(k + 'Up').addEventListener('click', () => { custom[k] = Math.min(hi, custom[k] + step); renderCustom(); });
+  });
+  $('paceChips').addEventListener('change', e => { custom.pace = e.target.value; renderCustom(); });
+  $('startCustom').addEventListener('click', () => start({ name: 'Custom', ...custom }));
+
+  /* ---------- Audio + voice ---------- */
+  let ctx = null, voice = null;
+  const hasSpeech = 'speechSynthesis' in window;
+  if (!hasSpeech) $('voiceNote').hidden = false;
+  function chooseVoice() {
+    if (!hasSpeech) return;
+    const vs = speechSynthesis.getVoices();
+    voice = vs.find(v => /en-US/i.test(v.lang) && v.localService) || vs.find(v => /^en/i.test(v.lang)) || null;
+  }
+  if (hasSpeech) { chooseVoice(); speechSynthesis.onvoiceschanged = chooseVoice; }
+  function unlockAudio() {
+    try {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === 'suspended') ctx.resume();
+    } catch (e) { ctx = null; }
+    if (hasSpeech) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); }
+  }
+  function beep(freq, dur) {
+    if (!ctx) return;
+    try {
+      const o = ctx.createOscillator(), g = ctx.createGain(), t = ctx.currentTime;
+      o.type = 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.22, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + dur + 0.02);
+    } catch (e) {}
+  }
+  function say(text, rate = 1.1) {
+    if (!hasSpeech) return;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      if (voice) u.voice = voice;
+      u.rate = rate;
+      speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+
+  /* ---------- Wake lock ---------- */
+  let lock = null;
+  async function keepAwake() { try { lock = await navigator.wakeLock.request('screen'); } catch (e) { lock = null; } }
+  function releaseAwake() { try { lock && lock.release(); } catch (e) {} lock = null; }
+  document.addEventListener('visibilitychange', () => { if (S && !S.paused && document.visibilityState === 'visible') keepAwake(); });
+
+  /* ---------- Session engine ---------- */
+  let S = null, timer = null;
+
+  function show(view) {
+    $('home').hidden = view !== 'home';
+    $('session').hidden = view !== 'session';
+    $('done').hidden = view !== 'done';
+    window.scrollTo(0, 0);
+  }
+
+  function start(cfg) {
+    unlockAudio();
+    keepAwake();
+    S = { cfg, phase: 'ready', round: 1, dur: 5, end: performance.now() + 5000, paused: false,
+          nextCall: 0, actionUntil: 0, last: '', workDone: 0, roundsDone: 0, calls: 0,
+          beeped: {}, tenSaid: false, lastTick: performance.now() };
+    setPhaseUI('ready');
+    setCall('Get in your stance', 'First round starts in 5', 'idle');
+    show('session');
+    $('pauseSheet').hidden = true;
+    say(`${cfg.name}. ${cfg.rounds} rounds. Get in your stance.`, 1.05);
+    clearInterval(timer);
+    timer = setInterval(tick, 100);
+    tick();
+  }
+
+  function setPhaseUI(phase) {
+    $('session').dataset.phase = phase;
+    $('session').dataset.action = 'off';
+    $('sPhase').textContent = phase === 'ready' ? 'Get ready' : phase === 'work' ? 'Work' : 'Rest';
+    $('sRound').innerHTML = `Round <b>${S.round}</b> / ${S.cfg.rounds}`;
+  }
+  function setCall(text, sub, kind) {
+    const el = $('sCall');
+    el.textContent = text;
+    el.className = 'callout ' + (kind || '');
+    void el.offsetWidth; el.classList.add('pop');
+    $('sSub').textContent = sub || '';
+  }
+  function showStance() {
+    $('session').dataset.action = 'off';
+    setCall('In stance', pick(IDLE_CUES), 'idle');
+  }
+
+  function callout(now) {
+    let move = null, tries = 0;
+    do {
+      const r = Math.random();
+      move = pick(r < 0.55 ? SINGLES : r < 0.8 ? CARDIO : COMBOS); tries++;
+    } while (move.t === S.last && tries < 8);
+    S.last = move.t; S.calls++;
+    $('session').dataset.action = 'on';
+    setCall(move.t, 'Then back to stance', 'action');
+    say(move.say || move.t, 1.15);
+    S.actionUntil = now + move.hold * 1000;
+    const [a, b] = PACE[S.cfg.pace].gap;
+    S.nextCall = now + Math.max(move.hold + 0.8, rand(a, b)) * 1000;
+  }
+
+  function begin(phase, dur) {
+    const now = performance.now();
+    S.phase = phase; S.dur = dur; S.end = now + dur * 1000; S.beeped = {}; S.tenSaid = false; S.actionUntil = 0;
+  }
+  function startWork(r) {
+    S.round = r;
+    begin('work', S.cfg.work);
+    setPhaseUI('work');
+    setCall('In stance', 'Move and wait for the call', 'idle');
+    beep(990, 0.4);
+    say(`Round ${r}. Go.`, 1.05);
+    S.nextCall = performance.now() + rand(2.5, 4) * 1000;
+  }
+  function startRest() {
+    begin('rest', S.cfg.rest);
+    setPhaseUI('rest');
+    setCall('Rest', `Next up: round ${S.round + 1}`, '');
+    beep(990, 0.2); setTimeout(() => beep(990, 0.2), 260);
+    say('Rest. Breathe.', 1.05);
+  }
+
+  function tick() {
+    if (!S || S.paused) return;
+    const now = performance.now();
+    const dt = (now - S.lastTick) / 1000; S.lastTick = now;
+    const remain = (S.end - now) / 1000;
+    if (S.phase === 'work') S.workDone += Math.min(dt, 1);
+
+    [3, 2, 1].forEach(s => { if (remain <= s && remain > 0 && !S.beeped[s]) { S.beeped[s] = true; beep(660, 0.12); } });
+    if (S.phase === 'rest' && S.dur >= 20 && remain <= 10 && !S.tenSaid) { S.tenSaid = true; say('Ten seconds. Get in your stance.', 1.05); }
+    if (S.phase === 'work') {
+      if (S.actionUntil && now >= S.actionUntil) { S.actionUntil = 0; showStance(); }
+      if (now >= S.nextCall && remain > 2.5) callout(now);
+    }
+
+    $('sTime').textContent = fmt(remain);
+    $('sBar').style.width = `${Math.min(100, (1 - remain / S.dur) * 100)}%`;
+
+    if (remain <= 0) {
+      if (S.phase === 'ready') startWork(1);
+      else if (S.phase === 'work') {
+        S.roundsDone = S.round;
+        if (S.round >= S.cfg.rounds) finish(true); else startRest();
+      } else startWork(S.round + 1);
+    }
+  }
+
+  function pause() {
+    if (!S || S.paused) return;
+    const now = performance.now();
+    S.paused = true; S.pausedRemain = S.end - now; S.pausedNext = S.nextCall - now;
+    S.pausedAction = S.actionUntil ? S.actionUntil - now : 0;
+    if (hasSpeech) speechSynthesis.cancel();
+    $('pauseInfo').textContent = S.workDone >= 30 ? `${fmt(S.workDone)} of work so far. Ending now still logs it.` : 'Under 30 seconds of work so far, so ending now won’t log a session.';
+    $('pauseSheet').hidden = false;
+    $('resumeBtn').focus();
+  }
+  function resume() {
+    const now = performance.now();
+    S.end = now + S.pausedRemain; S.nextCall = now + S.pausedNext;
+    S.actionUntil = S.pausedAction ? now + S.pausedAction : 0;
+    S.lastTick = now; S.paused = false;
+    $('pauseSheet').hidden = true;
+    unlockAudio(); keepAwake();
+  }
+
+  function finish(complete) {
+    clearInterval(timer); timer = null;
+    releaseAwake();
+    const logged = S.workDone >= 30;
+    if (logged) {
+      const log = store.get('log', []);
+      log.push({ date: dayKey(new Date()), name: S.cfg.name, minutes: Math.round(S.workDone / 6) / 10, calls: S.calls });
+      store.set('log', log.slice(-400));
+    }
+    if (complete) { beep(990, 0.6); say('Time. Session done.', 1.05); } else if (hasSpeech) speechSynthesis.cancel();
+    $('doneHead').textContent = logged ? (complete ? 'Session logged' : 'Logged early') : 'Not logged';
+    $('doneSub').textContent = logged
+      ? `${S.cfg.name} · ${fmt(S.workDone)} of work. Good rounds.`
+      : 'Less than 30 seconds of work, so this one didn’t count.';
+    $('dRounds').textContent = complete ? S.cfg.rounds : S.roundsDone;
+    $('dCalls').textContent = S.calls;
+    $('dStreak').textContent = streakInfo().streak;
+    S = null;
+    show('done');
+  }
+
+  $('pauseBtn').addEventListener('click', pause);
+  $('resumeBtn').addEventListener('click', resume);
+  $('endBtn').addEventListener('click', () => finish(false));
+  $('homeBtn').addEventListener('click', () => { renderStreak(); renderPresets(); show('home'); });
+  document.addEventListener('keydown', e => {
+    if (!S) return;
+    if (e.key === ' ' || e.key === 'Escape') { e.preventDefault(); S.paused ? resume() : pause(); }
+  });
+
+  renderStreak();
+  renderPresets();
+  renderCustom();
+})();
+</script>
