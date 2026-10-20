@@ -14,6 +14,7 @@
   --work: #f4a63a;      /* work + action = amber */
   --rest: #45c4b0;      /* rest = teal */
   --on-work: #1d1405;
+  --on-rest: #06201c;
   --display: "Saira Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
   --body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: dark;
@@ -21,12 +22,12 @@
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     --bg: #f2f3f8; --surface: #ffffff; --line: #d8dbe9; --fg: #151a30; --muted: #59607f;
-    --work: #c06a00; --rest: #0d8573; --on-work: #ffffff; color-scheme: light;
+    --work: #c06a00; --rest: #0d8573; --on-work: #ffffff; --on-rest: #ffffff; color-scheme: light;
   }
 }
 :root[data-theme="light"] {
   --bg: #f2f3f8; --surface: #ffffff; --line: #d8dbe9; --fg: #151a30; --muted: #59607f;
-  --work: #c06a00; --rest: #0d8573; --on-work: #ffffff; color-scheme: light;
+  --work: #c06a00; --rest: #0d8573; --on-work: #ffffff; --on-rest: #ffffff; color-scheme: light;
 }
 
 html, body { height: 100%; }
@@ -114,6 +115,28 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spac
 .btn.ghost { background: transparent; border: 1.5px solid currentColor; }
 .note { color: var(--muted); font-size: .9rem; margin: 0; }
 
+/* Pace step */
+.back { align-self: flex-start; background: none; border: 0; color: var(--muted); cursor: pointer; padding: 4px 0; font-size: 1rem; }
+.slider-wrap { display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.pace-readout { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.pace-word { font-family: var(--display); font-weight: 800; font-size: 2.4rem; line-height: 1; text-transform: uppercase; color: var(--work); }
+.pace-gap { color: var(--muted); font-variant-numeric: tabular-nums; }
+#paceSlider { width: 100%; height: 36px; margin: 0; accent-color: var(--work); cursor: pointer; }
+.ends { display: flex; justify-content: space-between; color: var(--muted); font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }
+
+/* Mode tabs */
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.tab { border: 0; background: transparent; padding: 10px; border-radius: 9px; cursor: pointer; font-family: var(--display); font-weight: 700; font-size: 1.2rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.tab[aria-selected="true"] { background: var(--bg); color: var(--fg); box-shadow: inset 0 -3px 0 var(--work); }
+#tabFlow[aria-selected="true"] { box-shadow: inset 0 -3px 0 var(--rest); }
+.panel { display: flex; flex-direction: column; gap: 22px; }
+
+/* Flow */
+.how.flow div:nth-child(2) { border-color: var(--rest); }
+.slider-wrap.flow .pace-word { color: var(--rest); }
+.flow-range { width: 100%; height: 36px; margin: 0; accent-color: var(--rest); cursor: pointer; }
+.btn.primary.flow { background: var(--rest); color: var(--on-rest); }
+
 /* Session screen */
 .session {
   --phase: var(--fg);
@@ -128,6 +151,7 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spac
 }
 .session[data-phase="work"] { --phase: var(--work); }
 .session[data-phase="rest"] { --phase: var(--rest); }
+.session[data-phase="flow"] { --phase: var(--rest); }
 .session[data-action="on"] { background: color-mix(in srgb, var(--work) 22%, var(--bg)); }
 .s-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .phase-pill { font-family: var(--display); font-weight: 800; font-size: 1.1rem; letter-spacing: .12em; text-transform: uppercase; background: var(--phase); color: var(--bg); padding: 4px 12px; border-radius: 6px; }
@@ -137,6 +161,8 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spac
 .callout { font-family: var(--display); font-weight: 800; text-transform: uppercase; line-height: .95; font-size: clamp(2.6rem, 13vw, 6.5rem); text-wrap: balance; max-width: 14ch; overflow-wrap: anywhere; }
 .callout.idle { color: var(--muted); font-size: clamp(2rem, 9vw, 4.2rem); }
 .callout.action { color: var(--work); }
+.callout.flowmove { color: var(--rest); }
+.callout.connector { color: var(--muted); font-size: clamp(1.8rem, 8vw, 3.6rem); }
 .callout.pop { animation: pop .3s ease-out; }
 @keyframes pop { from { transform: scale(.92); opacity: .3; } to { transform: none; opacity: 1; } }
 .subcall { color: var(--muted); font-size: 1.1rem; margin: 0; min-height: 1.5em; max-width: 30ch; }
@@ -166,14 +192,8 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spac
 <div id="home" class="wrap">
   <header>
     <div class="brand"><span class="mark" aria-hidden="true"></span><h1>Shadow Rounds</h1></div>
-    <p class="sub">Solo wrestling rounds with random callouts. Prop your phone up, tap a preset, move.</p>
+    <p class="sub">Solo grappling training with voice callouts. Prop your phone up, pick a mode, move.</p>
   </header>
-
-  <section class="how" aria-label="How a round works">
-    <div><b>Stay in stance</b><span>Circle, hand fight, keep your feet moving.</span></div>
-    <div><b>Hit the call</b><span>Explode into the move the moment you hear it.</span></div>
-    <div><b>Recover</b><span>Get back to stance fast. Repeat until time.</span></div>
-  </section>
 
   <section class="streak" aria-label="This week">
     <div class="streak-row">
@@ -181,6 +201,44 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spac
       <div class="label" id="weekCount">No sessions yet this week</div>
     </div>
     <div class="week" id="week"></div>
+  </section>
+
+  <div class="tabs" role="tablist" aria-label="Training mode">
+    <button type="button" class="tab" role="tab" id="tabRounds" aria-selected="true" aria-controls="roundsPanel">Conditioning</button>
+    <button type="button" class="tab" role="tab" id="tabFlow" aria-selected="false" aria-controls="flowPanel">Flow</button>
+  </div>
+
+  <div id="flowPanel" class="panel" role="tabpanel" aria-labelledby="tabFlow" hidden>
+    <section class="how flow" aria-label="How a flow works">
+      <div><b>Move</b><span>Hit each call smoothly. Quality over speed.</span></div>
+      <div><b>Blend</b><span>Watch "Next" and flow straight into it.</span></div>
+      <div><b>Keep going</b><span>One continuous block. No rest, no beeps.</span></div>
+    </section>
+    <section>
+      <h2 class="eyebrow">Length</h2>
+      <div class="slider-wrap flow">
+        <div class="pace-readout"><span class="pace-word" id="flowLenWord">10 min</span><span class="pace-gap">One continuous block</span></div>
+        <input type="range" class="flow-range" id="flowLen" min="5" max="20" step="1" value="10" aria-label="Flow length in minutes">
+        <div class="ends"><span>5 min</span><span>20 min</span></div>
+      </div>
+    </section>
+    <section>
+      <h2 class="eyebrow">Tempo</h2>
+      <div class="slider-wrap flow">
+        <div class="pace-readout"><span class="pace-word" id="flowTempoWord">Steady</span><span class="pace-gap" id="flowTempoGap">A move every 9–15 s</span></div>
+        <input type="range" class="flow-range" id="flowTempo" min="0" max="100" step="5" value="50" aria-label="Flow tempo" aria-describedby="flowTempoGap">
+        <div class="ends"><span>Relaxed</span><span>Brisk</span></div>
+      </div>
+    </section>
+    <p class="note">Moves: shrimp, bridge, backward and forward shoulder rolls, sit-out, technical stand-up and sprawl. You start standing, and each move begins where the last one ended.</p>
+    <button type="button" class="btn primary flow" id="startFlow">Start flow</button>
+  </div>
+
+  <div id="roundsPanel" class="panel" role="tabpanel" aria-labelledby="tabRounds">
+  <section class="how" aria-label="How a round works">
+    <div><b>Stay in stance</b><span>Circle, hand fight, keep your feet moving.</span></div>
+    <div><b>Hit the call</b><span>Explode into the move the moment you hear it.</span></div>
+    <div><b>Recover</b><span>Get back to stance fast. Repeat until time.</span></div>
   </section>
 
   <section>
@@ -207,9 +265,28 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spac
       <button type="button" class="btn primary" id="startCustom">Start custom session</button>
     </div>
   </details>
+  </div>
 
   <p class="note" id="voiceNote" hidden>Voice callouts aren't available in this browser, so callouts will show on screen only.</p>
   <p class="note">Tip: turn the ringer on. Callouts play through the speaker, and the screen stays awake during a session where the browser allows it.</p>
+</div>
+
+<div id="setup" class="wrap" hidden>
+  <button type="button" class="back" id="setupBack">&larr; Presets</button>
+  <header>
+    <h2 class="done-head" id="setupName">Match Rounds</h2>
+    <p class="sub" id="setupMeta"></p>
+  </header>
+  <section>
+    <h3 class="eyebrow">Choose your pace</h3>
+    <div class="slider-wrap">
+      <div class="pace-readout"><span class="pace-word" id="paceWord">Normal</span><span class="pace-gap" id="paceGap">A move every 5–10 s</span></div>
+      <input type="range" id="paceSlider" min="0" max="100" step="5" value="50" aria-label="Callout pace" aria-describedby="paceGap">
+      <div class="ends"><span>Chill</span><span>Scramble</span></div>
+      <p class="note" id="paceSuggest"></p>
+    </div>
+  </section>
+  <button type="button" class="btn primary" id="setupStart">Start</button>
 </div>
 
 <div id="session" class="session" data-phase="ready" hidden>
@@ -237,18 +314,18 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spac
   <h2 class="done-head" id="doneHead">Session logged</h2>
   <p class="sub" id="doneSub"></p>
   <div class="stats">
-    <div class="stat"><div class="big-num" id="dRounds">0</div><div class="label">rounds</div></div>
-    <div class="stat"><div class="big-num" id="dCalls">0</div><div class="label">moves hit</div></div>
+    <div class="stat"><div class="big-num" id="dRounds">0</div><div class="label" id="dRoundsLabel">rounds</div></div>
+    <div class="stat"><div class="big-num" id="dCalls">0</div><div class="label" id="dCallsLabel">moves hit</div></div>
     <div class="stat"><div class="big-num" id="dStreak">0</div><div class="label">day streak</div></div>
   </div>
-  <button type="button" class="btn primary" id="homeBtn">Back to presets</button>
+  <button type="button" class="btn primary" id="homeBtn">Back home</button>
 </div>
 
 <script>
 (() => {
   /* ---------- Standing / wrestling callouts ---------- */
   // Mix per call: ~55% singles, ~25% cardio bursts, ~20% combos. Each move holds on screen for `hold` seconds.
-  const SINGLES = ['Sprawl', 'Double leg', 'Single leg', 'Snap-down'].map(t => ({ t, hold: 2.2 }));
+  const SINGLES = ['Sprawl', 'Double leg', 'Single leg', 'Snap-down', 'Down block'].map(t => ({ t, hold: 2.2 }));
   const CARDIO  = [{ t: 'Tuck jump', hold: 2 }, { t: 'Sprawl and jump', hold: 3 }, { t: 'Sprawl to shot', hold: 3 }, { t: 'Fast feet', say: 'Fast feet, five seconds', hold: 5 }, { t: 'Spin drill', say: 'Spin drill, five seconds', hold: 5 }];
   const COMBOS  = ['Shot, sprawl', 'Fake shot, snap-down', 'Sprawl, re-shot', 'Level change, double leg'].map(t => ({ t, hold: 3 }));
   const IDLE_CUES = ['Circle, hand fight', 'Feet moving, stay low', 'Head up, hips under you', 'Pummel, look for an angle'];
@@ -305,6 +382,38 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spac
   }
 
   /* ---------- Home: presets ---------- */
+  let setupPreset = null;
+  const PACE_POS = { chill: 0, normal: 50, scramble: 100 };
+  const lerp = (x, y, t) => x + (y - x) * t;
+  const half = n => Math.round(n * 2) / 2;
+  // Slider 0-100: Chill at 0, Normal at 50, Scramble at 100, blended in between.
+  function paceFromLevel(v) {
+    const t = v / 100, first = t <= 0.5;
+    const lo = first ? PACE.chill : PACE.normal, hi = first ? PACE.normal : PACE.scramble, u = first ? t * 2 : (t - 0.5) * 2;
+    const gap = [lerp(lo.gap[0], hi.gap[0], u), lerp(lo.gap[1], hi.gap[1], u)];
+    const word = v < 20 ? 'Chill' : v < 40 ? 'Easy' : v < 60 ? 'Normal' : v < 80 ? 'Fast' : 'Scramble';
+    return { gap, word };
+  }
+  function renderPace() {
+    const { gap, word } = paceFromLevel(+$('paceSlider').value);
+    $('paceWord').textContent = word;
+    $('paceGap').textContent = `A move every ${half(gap[0])}–${half(gap[1])} s`;
+  }
+  function openSetup(p) {
+    setupPreset = p;
+    $('paceSlider').value = PACE_POS[p.pace] ?? 50;
+    $('setupName').textContent = p.name;
+    $('setupMeta').textContent = `${fmt(p.work)} work · ${fmt(p.rest)} rest · ${p.rounds} rounds · ~${totalMin(p)} min`;
+    renderPace();
+    $('paceSuggest').textContent = `Suggested for this preset: ${PACE[p.pace].name}`;
+    show('setup');
+  }
+  $('paceSlider').addEventListener('input', renderPace);
+  $('setupBack').addEventListener('click', () => show('home'));
+  $('setupStart').addEventListener('click', () => {
+    store.set('last', setupPreset.id);
+    start({ ...setupPreset, gap: paceFromLevel(+$('paceSlider').value).gap });
+  });
   const playIcon = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5v13L14 8z" fill="currentColor"/></svg>';
   function renderPresets() {
     const last = store.get('last', null);
@@ -312,15 +421,14 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spac
     $('presets').innerHTML = list.map(p => `
       <button type="button" class="preset" data-id="${p.id}">
         <span class="name">${p.name}${p.id === last ? '<span class="chip">Last used</span>' : ''}</span>
-        <span class="meta">${fmt(p.work)} work · ${fmt(p.rest)} rest · ${p.rounds} rounds · ~${totalMin(p)} min<br>${PACE[p.pace].name} pace, ${PACE[p.pace].note}</span>
+        <span class="meta">${fmt(p.work)} work · ${fmt(p.rest)} rest · ${p.rounds} rounds · ~${totalMin(p)} min<br>Suggested pace: ${PACE[p.pace].name}</span>
         <span class="go">${playIcon}</span>
       </button>`).join('');
   }
   $('presets').addEventListener('click', e => {
     const b = e.target.closest('.preset'); if (!b) return;
     const p = PRESETS.find(x => x.id === b.dataset.id);
-    store.set('last', p.id);
-    start({ ...p });
+    openSetup(p);
   });
 
   /* ---------- Custom builder ---------- */
@@ -343,6 +451,128 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spac
   });
   $('paceChips').addEventListener('change', e => { custom.pace = e.target.value; renderCustom(); });
   $('startCustom').addEventListener('click', () => start({ name: 'Custom', ...custom }));
+
+  /* ---------- Mode tabs ---------- */
+  function setTab(t) {
+    const flow = t === 'flow';
+    $('tabRounds').setAttribute('aria-selected', String(!flow));
+    $('tabFlow').setAttribute('aria-selected', String(flow));
+    $('roundsPanel').hidden = flow;
+    $('flowPanel').hidden = !flow;
+    store.set('tab', flow ? 'flow' : 'rounds');
+  }
+  $('tabRounds').addEventListener('click', () => setTab('rounds'));
+  $('tabFlow').addEventListener('click', () => setTab('flow'));
+  setTab(store.get('tab', 'rounds'));
+
+  /* ---------- Flow mode ---------- */
+  // Each move starts where the last one ended. Connectors are short cues that link positions.
+  const FLOW_MOVES = [
+    { t: 'Shrimp', from: 'back', to: 'back' },
+    { t: 'Bridge', from: 'back', to: 'back' },
+    { t: 'Backward shoulder roll', from: 'back', to: 'fours' },
+    { t: 'Sit-out', from: 'fours', to: 'fours' },
+    { t: 'Technical stand-up', from: 'seated', to: 'standing' },
+    { t: 'Forward shoulder roll', from: 'standing', to: 'seated' },
+    { t: 'Sprawl', from: 'standing', to: 'fours' },
+    { t: 'Back to your feet', from: 'fours', to: 'standing', connector: true },
+    { t: 'Lie back', from: 'seated', to: 'back', connector: true }
+  ];
+  const POS_NAME = { back: 'On your back', fours: 'All fours', standing: 'Standing', seated: 'Seated' };
+  const flowSaved = Object.assign({ len: 10, tempo: 50 }, store.get('flow', {}));
+  $('flowLen').value = flowSaved.len;
+  $('flowTempo').value = flowSaved.tempo;
+  const flowGap = v => [lerp(12, 6, v / 100), lerp(20, 10, v / 100)];
+  function renderFlow() {
+    const v = +$('flowTempo').value, [a, b] = flowGap(v);
+    $('flowLenWord').textContent = `${$('flowLen').value} min`;
+    $('flowTempoWord').textContent = v < 34 ? 'Relaxed' : v < 67 ? 'Steady' : 'Brisk';
+    $('flowTempoGap').textContent = `A move every ${half(a)}–${half(b)} s`;
+  }
+  $('flowLen').addEventListener('input', renderFlow);
+  $('flowTempo').addEventListener('input', renderFlow);
+
+  // Shortest chain of position changes from one position to another.
+  function route(from, to) {
+    if (from === to) return [];
+    const queue = [[from, []]], seen = new Set([from]);
+    while (queue.length) {
+      const [p, path] = queue.shift();
+      for (const m of FLOW_MOVES.filter(x => x.from === p && x.to !== p)) {
+        if (seen.has(m.to)) continue;
+        const next = [...path, m];
+        if (m.to === to) return next;
+        seen.add(m.to);
+        queue.push([m.to, next]);
+      }
+    }
+    return [];
+  }
+  // Aim for the move you've done least this session, then travel there by the shortest chain.
+  // Keeps every move in rotation instead of looping between the same few.
+  function planNext(pos) {
+    if (!S.queue.length) {
+      const real = FLOW_MOVES.filter(m => !m.connector && m.t !== S.last);
+      const least = Math.min(...real.map(m => S.uses[m.t] || 0));
+      const target = pick(real.filter(m => (S.uses[m.t] || 0) === least));
+      S.queue = [...route(pos, target.from), target];
+    }
+    const m = S.queue.shift();
+    S.last = m.t;
+    if (!m.connector) S.uses[m.t] = (S.uses[m.t] || 0) + 1;
+    return m;
+  }
+  function startFlow() {
+    const len = +$('flowLen').value, tempo = +$('flowTempo').value;
+    store.set('flow', { len, tempo });
+    unlockAudio();
+    keepAwake();
+    const now = performance.now();
+    S = { mode: 'flow', cfg: { name: 'Flow', gap: flowGap(tempo), rounds: 1 }, phase: 'ready', round: 1, dur: 5, end: now + 5000,
+          paused: false, flowLen: len * 60, pos: 'standing', queue: [], uses: {}, last: '', next: null, nextCall: 0, actionUntil: 0,
+          workDone: 0, roundsDone: 0, calls: 0, lastTick: now };
+    S.next = planNext('standing');
+    $('session').dataset.phase = 'flow';
+    $('session').dataset.action = 'off';
+    $('sPhase').textContent = 'Flow';
+    $('sRound').textContent = POS_NAME.standing;
+    setCall('Start standing', `First move: ${S.next.t}`, 'idle');
+    show('session');
+    $('pauseSheet').hidden = true;
+    say(`Flow. ${len} minutes. Start standing.`, 0.95);
+    clearInterval(timer);
+    timer = setInterval(tick, 100);
+    tick();
+  }
+  function flowCall(now) {
+    const m = S.next;
+    S.pos = m.to;
+    if (!m.connector) S.calls++;
+    S.next = planNext(S.pos);
+    $('sRound').textContent = m.from === m.to ? POS_NAME[m.to] : `${POS_NAME[m.from]} → ${POS_NAME[m.to]}`;
+    setCall(m.t, `Next: ${S.next.t}`, m.connector ? 'connector' : 'flowmove');
+    say(m.t, 0.95);
+    const [a, b] = S.cfg.gap;
+    S.nextCall = now + Math.max(3, rand(a, b) * (m.connector ? 0.5 : 1)) * 1000;
+  }
+  function flowTick() {
+    const now = performance.now();
+    const dt = (now - S.lastTick) / 1000; S.lastTick = now;
+    const remain = (S.end - now) / 1000;
+    if (S.phase === 'flow') {
+      S.workDone += Math.min(dt, 1);
+      if (now >= S.nextCall && remain > 3) flowCall(now);
+    }
+    $('sTime').textContent = fmt(remain);
+    $('sBar').style.width = `${Math.min(100, (1 - remain / S.dur) * 100)}%`;
+    if (remain <= 0) {
+      if (S.phase === 'ready') { begin('flow', S.flowLen); S.nextCall = now + 1200; chime(); }
+      else { S.roundsDone = 1; finish(true); }
+    }
+  }
+  function chime() { beep(659, 0.6); setTimeout(() => beep(988, 0.9), 220); }
+  $('startFlow').addEventListener('click', startFlow);
+  renderFlow();
 
   /* ---------- Audio + voice ---------- */
   let ctx = null, voice = null;
@@ -396,6 +626,7 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spac
     $('home').hidden = view !== 'home';
     $('session').hidden = view !== 'session';
     $('done').hidden = view !== 'done';
+    $('setup').hidden = view !== 'setup';
     window.scrollTo(0, 0);
   }
 
@@ -444,7 +675,7 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spac
     setCall(move.t, 'Then back to stance', 'action');
     say(move.say || move.t, 1.15);
     S.actionUntil = now + move.hold * 1000;
-    const [a, b] = PACE[S.cfg.pace].gap;
+    const [a, b] = S.cfg.gap || PACE[S.cfg.pace].gap;
     S.nextCall = now + Math.max(move.hold + 0.8, rand(a, b)) * 1000;
   }
 
@@ -471,6 +702,7 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spac
 
   function tick() {
     if (!S || S.paused) return;
+    if (S.mode === 'flow') return flowTick();
     const now = performance.now();
     const dt = (now - S.lastTick) / 1000; S.lastTick = now;
     const remain = (S.end - now) / 1000;
@@ -523,12 +755,18 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spac
       log.push({ date: dayKey(new Date()), name: S.cfg.name, minutes: Math.round(S.workDone / 6) / 10, calls: S.calls });
       store.set('log', log.slice(-400));
     }
-    if (complete) { beep(990, 0.6); say('Time. Session done.', 1.05); } else if (hasSpeech) speechSynthesis.cancel();
+    const flow = S.mode === 'flow';
+    if (complete) {
+      if (flow) { chime(); say('Flow complete. Nice work.', 0.95); }
+      else { beep(990, 0.6); say('Time. Session done.', 1.05); }
+    } else if (hasSpeech) speechSynthesis.cancel();
     $('doneHead').textContent = logged ? (complete ? 'Session logged' : 'Logged early') : 'Not logged';
     $('doneSub').textContent = logged
-      ? `${S.cfg.name} · ${fmt(S.workDone)} of work. Good rounds.`
+      ? (flow ? `Flow · ${fmt(S.workDone)} of movement. Smooth work.` : `${S.cfg.name} · ${fmt(S.workDone)} of work. Good rounds.`)
       : 'Less than 30 seconds of work, so this one didn’t count.';
-    $('dRounds').textContent = complete ? S.cfg.rounds : S.roundsDone;
+    $('dRounds').textContent = flow ? fmt(S.workDone) : (complete ? S.cfg.rounds : S.roundsDone);
+    $('dRoundsLabel').textContent = flow ? 'flow time' : 'rounds';
+    $('dCallsLabel').textContent = flow ? 'moves' : 'moves hit';
     $('dCalls').textContent = S.calls;
     $('dStreak').textContent = streakInfo().streak;
     S = null;
