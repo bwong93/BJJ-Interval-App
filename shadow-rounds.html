@@ -186,6 +186,25 @@ input[type="range"] { width: 100%; height: 36px; margin: 0; accent-color: var(--
 .sheet .btn { width: 100%; }
 
 /* Done */
+.switch { position: relative; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.switch input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.switch .box { width: 28px; height: 28px; border: 2px solid var(--ink); flex: none; display: grid; place-items: center; }
+.switch input:checked + .box { background: var(--accent); border-color: var(--accent); }
+.switch input:checked + .box::after { content: "✓"; color: var(--on-accent); font-weight: 700; font-size: 1.1rem; line-height: 1; }
+.switch input:focus-visible + .box { outline: 3px solid var(--accent); outline-offset: 2px; }
+.switch .text { font-weight: 700; font-size: 1.05rem; line-height: 1.2; }
+.eyebrow .chip { margin-left: 6px; vertical-align: 1px; }
+.score-line { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 12px; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--s-mute); font-variant-numeric: tabular-nums; }
+.score-line b { color: var(--s-fg); font-size: 2rem; letter-spacing: -.04em; margin-left: 6px; line-height: 1; }
+.meter { position: relative; height: 6px; margin-top: 8px; background: color-mix(in srgb, var(--s-fg) 14%, transparent); }
+.meter > div { height: 100%; width: 0; background: var(--s-fg); }
+.meter::after { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 2px; background: var(--s-fg); }
+.cam-prev { width: 132px; height: 99px; object-fit: cover; transform: scaleX(-1); border: 2px solid var(--s-fg); background: #000; }
+.cam-prev.off { position: absolute; width: 1px; height: 1px; opacity: 0; border: 0; pointer-events: none; }
+.score-block { border-top: 2px solid var(--ink); padding-top: 10px; display: flex; flex-direction: column; gap: 16px; }
+.score-big { font-size: clamp(5.5rem, 34vw, 11rem); font-weight: 700; letter-spacing: -.07em; line-height: .8; color: var(--accent); font-variant-numeric: tabular-nums; margin-left: -.04em; }
+.grade-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.grade { font-size: 2.6rem; font-weight: 700; letter-spacing: -.05em; line-height: 1; border: 3px solid var(--ink); padding: 4px 14px; }
 .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .stat { border-top: 2px solid var(--ink); padding-top: 8px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
 .stat .big-num { font-size: clamp(2.2rem, 11vw, 4.5rem); }
@@ -271,6 +290,9 @@ input[type="range"] { width: 100%; height: 36px; margin: 0; accent-color: var(--
         <span class="flabel">Callout pace</span>
         <div class="chips" id="paceChips"></div>
       </div>
+      <div class="field cam-opt">
+        <label class="switch"><input type="checkbox" id="camCustomOn"><span class="box" aria-hidden="true"></span><span class="text">Camera scoring <span class="chip">Beta</span></span></label>
+      </div>
       <p class="est" id="customEst"></p>
       <button type="button" class="btn primary" id="startCustom">Start custom session</button>
     </div>
@@ -296,6 +318,11 @@ input[type="range"] { width: 100%; height: 36px; margin: 0; accent-color: var(--
       <p class="note" id="paceSuggest"></p>
     </div>
   </section>
+  <section class="cam-opt">
+    <h3 class="eyebrow">Camera scoring <span class="chip">Beta</span></h3>
+    <label class="switch"><input type="checkbox" id="camSetupOn"><span class="box" aria-hidden="true"></span><span class="text">Score my session with the camera</span></label>
+    <p class="note" style="margin-top:10px">Prop your phone 2–3 m away with your whole body in frame. It scores reaction speed and effort, not technique. Video stays on your phone and is never recorded or sent anywhere.</p>
+  </section>
   <button type="button" class="btn primary" id="setupStart">Start</button>
 </div>
 
@@ -306,7 +333,10 @@ input[type="range"] { width: 100%; height: 36px; margin: 0; accent-color: var(--
   </div>
   <div class="s-timer" id="sTime">0:05</div>
   <div class="bar"><div id="sBar"></div></div>
+  <div class="score-line" id="sScoreLine" hidden><span>Score<b id="sScoreNum">0</b></span><span id="sCombo">Combo ×1.0</span></div>
+  <div class="meter" id="sMeterWrap" hidden><div id="sMeter"></div></div>
   <div class="s-main">
+    <video id="camPrev" class="cam-prev off" playsinline muted></video>
     <div id="sCall" class="callout" aria-live="polite">Get set</div>
     <p id="sSub" class="subcall"></p>
   </div>
@@ -323,6 +353,17 @@ input[type="range"] { width: 100%; height: 36px; margin: 0; accent-color: var(--
 <div id="done" class="wrap" hidden>
   <h2 class="done-head" id="doneHead">Session logged</h2>
   <p class="sub" id="doneSub"></p>
+  <div class="score-block" id="scoreBlock" hidden>
+    <div class="eyebrow" style="margin:0">Score</div>
+    <div class="score-big" id="dScore">0</div>
+    <div class="grade-row"><span class="grade" id="dGrade">A</span><span class="chip" id="dBest"></span></div>
+    <p class="sub" id="dScoreNote" style="margin:0" hidden></p>
+    <div class="stats">
+      <div class="stat"><div class="big-num" id="dHit">0%</div><div class="label">hit rate</div></div>
+      <div class="stat"><div class="big-num" id="dReact">0.0</div><div class="label">avg reaction</div></div>
+      <div class="stat"><div class="big-num" id="dCombo">0</div><div class="label">best combo</div></div>
+    </div>
+  </div>
   <div class="stats">
     <div class="stat"><div class="big-num" id="dRounds">0</div><div class="label" id="dRoundsLabel">rounds</div></div>
     <div class="stat"><div class="big-num" id="dCalls">0</div><div class="label" id="dCallsLabel">moves hit</div></div>
@@ -423,7 +464,7 @@ input[type="range"] { width: 100%; height: 36px; margin: 0; accent-color: var(--
   $('setupBack').addEventListener('click', () => show('home'));
   $('setupStart').addEventListener('click', () => {
     store.set('last', setupPreset.id);
-    start({ ...setupPreset, gap: paceFromLevel(+$('paceSlider').value).gap });
+    launch({ ...setupPreset, gap: paceFromLevel(+$('paceSlider').value).gap }, $('camSetupOn').checked);
   });
   function renderPresets() {
     const last = store.get('last', null);
@@ -463,7 +504,7 @@ input[type="range"] { width: 100%; height: 36px; margin: 0; accent-color: var(--
     $(k + 'Up').addEventListener('click', () => { custom[k] = Math.min(hi, custom[k] + step); renderCustom(); });
   });
   $('paceChips').addEventListener('change', e => { custom.pace = e.target.value; renderCustom(); });
-  $('startCustom').addEventListener('click', () => start({ name: 'Custom', ...custom }));
+  $('startCustom').addEventListener('click', () => launch({ name: 'Custom', ...custom }, $('camCustomOn').checked));
 
   /* ---------- Mode tabs ---------- */
   function setTab(t) {
@@ -691,14 +732,140 @@ input[type="range"] { width: 100%; height: 36px; margin: 0; accent-color: var(--
     window.scrollTo(0, 0);
   }
 
-  function start(cfg) {
+  /* ---------- Camera scoring (Conditioning, optional) ---------- */
+  // Motion-based: measures how fast and how hard you moved after each call, not whether the technique was right.
+  // Frames are compared on a tiny grayscale canvas on this device. Nothing is recorded or sent anywhere.
+  const clamp01 = x => Math.max(0, Math.min(1, x));
+  /* judge:start */
+  // w = { hold, first (s until movement began, or null), active (s spent above threshold) }
+  function judge(w) {
+    const react = w.first === null ? null : Math.max(0, w.first - 0.4);   // 0.4 s allowance for the voice to speak
+    const need = Math.min(0.4 * w.hold, 2.0);                              // sustained effort needed for a clean hit
+    let tier = 'miss';
+    if (w.first !== null && react <= 1.6 && w.active >= need) tier = 'clean';
+    else if (w.first !== null && w.active >= need / 2) tier = 'okay';
+    return { tier, react };
+  }
+  const comboMult = combo => 1 + Math.min(combo, 10) * 0.1;
+  function points(tier, react, combo) {
+    if (tier === 'miss') return 0;
+    const base = tier === 'clean' ? 100 + Math.round(50 * clamp01((1.4 - react) / 0.9)) : 50;
+    return Math.round(base * comboMult(combo));
+  }
+  const gradeFor = rate => rate >= 0.9 ? 'S' : rate >= 0.75 ? 'A' : rate >= 0.6 ? 'B' : rate >= 0.4 ? 'C' : 'D';
+  /* judge:end */
+
+  const CAM_W = 64, CAM_H = 48, DIFF_T = 24;   // sample size; per-pixel change (0-255) that counts as movement
+  const cam = { stream: null, video: $('camPrev'), cvs: document.createElement('canvas'), ctx: null, prev: null, timer: null, energy: 0 };
+  cam.cvs.width = CAM_W; cam.cvs.height = CAM_H;
+  const camSupported = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+
+  async function camOpen() {
+    if (cam.stream) return true;
+    if (!camSupported) return false;
+    try {
+      cam.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 320 }, height: { ideal: 240 } }, audio: false });
+      cam.video.srcObject = cam.stream;
+      try { await cam.video.play(); } catch (e) {}
+      cam.ctx = cam.cvs.getContext('2d', { willReadFrequently: true });
+      cam.prev = null; cam.energy = 0;
+      clearInterval(cam.timer);
+      cam.timer = setInterval(camSample, 70);
+      return true;
+    } catch (e) { cam.stream = null; return false; }
+  }
+  function camClose() {
+    clearInterval(cam.timer); cam.timer = null;
+    if (cam.stream) cam.stream.getTracks().forEach(t => t.stop());
+    cam.stream = null; cam.prev = null;
+    cam.video.srcObject = null;
+    showPreview(false);
+  }
+  function showPreview(on) { cam.video.classList.toggle('off', !on); }
+
+  function camSample() {
+    if (!cam.stream || cam.video.readyState < 2) return;
+    cam.ctx.drawImage(cam.video, 0, 0, CAM_W, CAM_H);
+    const d = cam.ctx.getImageData(0, 0, CAM_W, CAM_H).data;
+    const n = CAM_W * CAM_H, g = new Uint8Array(n);
+    for (let i = 0, j = 0; i < n; i++, j += 4) g[i] = (d[j] * 77 + d[j + 1] * 150 + d[j + 2] * 29) >> 8;
+    if (cam.prev) {
+      let moved = 0;
+      for (let i = 0; i < n; i++) if (Math.abs(g[i] - cam.prev[i]) > DIFF_T) moved++;
+      cam.energy = cam.energy * 0.5 + (moved / n) * 0.5;
+      camScore(performance.now());
+    }
+    cam.prev = g;
+  }
+  const camThr = sc => Math.max(0.06, sc.base * 2, sc.base + 0.05);
+
+  function camScore(now) {
+    const sc = S && S.sc;
+    if (!sc || S.paused) return;
+    const e = cam.energy, thr = camThr(sc);
+    $('sMeter').style.width = `${Math.min(100, (e / (thr * 2)) * 100)}%`;
+    // Learn what "in stance, moving around" looks like, so the bar for a call adapts to this room and this person.
+    if (S.phase === 'ready' || (S.phase === 'work' && !sc.win && now > sc.quietUntil)) {
+      const a = sc.baseSet ? (S.phase === 'ready' ? 0.12 : 0.03) : 1;
+      sc.base = Math.min(0.1, Math.max(0.01, sc.base * (1 - a) + e * a));
+      sc.baseSet = true;
+    }
+    const w = sc.win;
+    if (!w) return;
+    const dt = Math.min(0.2, (now - w.lastT) / 1000); w.lastT = now;
+    if (e >= thr) { if (w.first === null) w.first = (now - w.t0) / 1000; w.active += dt; }
+    if (now >= w.end) closeWindow(now);
+  }
+  function openWindow(now, move) {
+    if (S.sc.win) closeWindow(now);
+    S.sc.win = { t0: now, lastT: now, hold: move.hold, first: null, active: 0, end: now + (move.hold + 0.4) * 1000 };
+  }
+  function closeWindow(now) {
+    const sc = S.sc, w = sc.win; sc.win = null; sc.quietUntil = now + 1500;
+    const { tier, react } = judge(w);
+    const pts = points(tier, react, sc.combo);
+    sc.scored++;
+    let msg;
+    if (tier === 'miss') { sc.combo = 0; msg = 'Missed · no movement seen'; }
+    else {
+      sc.hits++; sc.score += pts; sc.combo++; sc.bestCombo = Math.max(sc.bestCombo, sc.combo);
+      sc.reactSum += react; sc.reactN++;
+      msg = `${tier === 'clean' ? 'Clean' : 'Okay'} · ${react.toFixed(1)} s · +${pts}`;
+      if (tier === 'clean') beep(1320, 0.07);
+    }
+    $('sScoreNum').textContent = sc.score.toLocaleString('en-US');
+    $('sCombo').textContent = `Combo ×${comboMult(sc.combo).toFixed(1)}`;
+    if (S.phase === 'work' && !S.actionUntil) $('sSub').textContent = msg;
+  }
+  function newScore() { return { score: 0, combo: 0, bestCombo: 0, hits: 0, scored: 0, reactSum: 0, reactN: 0, base: 0.04, baseSet: false, win: null, quietUntil: 0 }; }
+
+  // One switch, remembered, shown on both the pace screen and the custom builder.
+  const camPref = store.get('cam', false);
+  ['camSetupOn', 'camCustomOn'].forEach(id => {
+    const el = $(id); el.checked = !!camPref && camSupported;
+    el.addEventListener('change', () => { store.set('cam', el.checked); $('camSetupOn').checked = $('camCustomOn').checked = el.checked; });
+  });
+  if (!camSupported) document.querySelectorAll('.cam-opt').forEach(el => { el.hidden = true; });
+
+  async function launch(cfg, wantCam) {
+    unlockAudio();                     // inside the tap, before the permission prompt
+    const ok = wantCam ? await camOpen() : false;
+    start(cfg, ok, wantCam && !ok);
+  }
+
+  function start(cfg, useCam, camFailed) {
     unlockAudio();
     keepAwake();
-    S = { cfg, phase: 'ready', round: 1, dur: 5, end: performance.now() + 5000, paused: false,
+    const readyDur = useCam ? 10 : 5;
+    S = { cfg, phase: 'ready', round: 1, dur: readyDur, end: performance.now() + readyDur * 1000, paused: false,
           nextCall: 0, actionUntil: 0, last: '', workDone: 0, roundsDone: 0, calls: 0,
           beeped: {}, tenSaid: false, lastTick: performance.now() };
+    if (useCam) S.sc = newScore();
+    $('sScoreLine').hidden = $('sMeterWrap').hidden = !useCam;
+    $('sScoreNum').textContent = '0'; $('sCombo').textContent = 'Combo ×1.0'; $('sMeter').style.width = '0';
+    showPreview(useCam);
     setPhaseUI('ready');
-    setCall('Get in your stance', 'First round starts in 5', 'idle');
+    setCall('Get in your stance', useCam ? 'Step back until your whole body is in frame' : camFailed ? 'Camera unavailable. Scoring is off.' : 'First round starts in 5', 'idle');
     show('session');
     $('pauseSheet').hidden = true;
     say(`${cfg.name}. ${cfg.rounds} rounds. Get in your stance.`, 1.05);
@@ -732,6 +899,7 @@ input[type="range"] { width: 100%; height: 36px; margin: 0; accent-color: var(--
       move = pick(r < 0.55 ? SINGLES : r < 0.8 ? CARDIO : COMBOS); tries++;
     } while (move.t === S.last && tries < 8);
     S.last = move.t; S.calls++;
+    if (S.sc) openWindow(now, move);
     $('session').dataset.action = 'on';
     setCall(move.t, 'Then back to stance', 'action');
     say(move.say || move.t, 1.15);
@@ -749,6 +917,8 @@ input[type="range"] { width: 100%; height: 36px; margin: 0; accent-color: var(--
     begin('work', S.cfg.work);
     setPhaseUI('work');
     setCall('In stance', 'Move and wait for the call', 'idle');
+    showPreview(false);
+    if (S.sc) S.sc.quietUntil = performance.now() + 1500;
     beep(990, 0.4);
     say(`Round ${r}. Go.`, 1.05);
     S.nextCall = performance.now() + rand(2.5, 4) * 1000;
@@ -793,6 +963,7 @@ input[type="range"] { width: 100%; height: 36px; margin: 0; accent-color: var(--
     const now = performance.now();
     S.paused = true; S.pausedRemain = S.end - now; S.pausedNext = S.nextCall - now;
     S.pausedAction = S.actionUntil ? S.actionUntil - now : 0;
+    if (S.sc) S.sc.win = null;   // a call interrupted by a pause isn't scored
     if (hasSpeech) speechSynthesis.cancel();
     $('pauseInfo').textContent = S.workDone >= 30 ? `${fmt(S.workDone)} of work so far. Ending now still logs it.` : 'Under 30 seconds of work so far, so ending now won’t log a session.';
     $('pauseSheet').hidden = false;
@@ -811,9 +982,13 @@ input[type="range"] { width: 100%; height: 36px; margin: 0; accent-color: var(--
     clearInterval(timer); timer = null;
     releaseAwake();
     const logged = S.workDone >= 30;
+    const sc = S.sc;
+    if (sc && sc.win) sc.win = null;
+    const rate = sc && sc.scored ? sc.hits / sc.scored : 0;
+    const grade = gradeFor(rate);
     if (logged) {
       const log = store.get('log', []);
-      log.push({ date: dayKey(new Date()), name: S.cfg.name, minutes: Math.round(S.workDone / 6) / 10, calls: S.calls });
+      log.push({ date: dayKey(new Date()), name: S.cfg.name, minutes: Math.round(S.workDone / 6) / 10, calls: S.calls, ...(sc ? { score: sc.score, grade } : {}) });
       store.set('log', log.slice(-400));
     }
     const flow = S.mode === 'flow';
@@ -830,6 +1005,27 @@ input[type="range"] { width: 100%; height: 36px; margin: 0; accent-color: var(--
     $('dCallsLabel').textContent = flow ? 'moves + poses' : 'moves hit';
     $('dCalls').textContent = S.calls + (S.poses || 0);
     $('dStreak').textContent = streakInfo().streak;
+    $('scoreBlock').hidden = !sc;
+    if (sc) {
+      const has = sc.scored > 0;
+      $('dScore').textContent = has ? sc.score.toLocaleString('en-US') : '0';
+      $('dGrade').textContent = has ? grade : '–';
+      $('dHit').textContent = has ? `${Math.round(rate * 100)}%` : '–';
+      $('dReact').textContent = sc.reactN ? `${(sc.reactSum / sc.reactN).toFixed(1)}s` : '–';
+      $('dCombo').textContent = sc.bestCombo;
+      $('dScoreNote').hidden = has;
+      $('dScoreNote').textContent = 'No calls were scored. Check that the camera can see you, then try again.';
+      const prev = store.get('best', null);
+      let chip = '';
+      if (has) {
+        if (!prev) chip = 'First score';
+        else if (sc.score > prev.score) chip = 'New personal best';
+        else chip = `Best ${prev.score.toLocaleString('en-US')}`;
+        if (!prev || sc.score > prev.score) store.set('best', { score: sc.score, date: dayKey(new Date()) });
+      }
+      $('dBest').textContent = chip; $('dBest').hidden = !chip;
+    }
+    camClose();
     S = null;
     show('done');
   }

@@ -13,6 +13,7 @@ A passion project built for fun, not for profit. Styled in a Swiss / Internation
 - **Hit the call.** A move is announced by voice and flashes on screen, then the screen returns to "In stance".
 - **Presets:** Match Rounds (3 x 2:00), Shot Sprints (10 x 0:30), Long Grind (3 x 5:00), plus a custom timing builder.
 - **Pace slider:** after picking a preset, choose how often moves are called, from Chill to Scramble.
+- **Camera scoring (beta, optional):** prop your phone 2–3 m away and the front camera scores how quickly and how hard you move after each call, with a combo multiplier and an end-of-session score, grade and personal best. It measures reaction speed and effort, not technique. Video is analysed on the device and never recorded or sent anywhere. Needs a hosted (HTTPS) page to work.
 
 ## Flow
 
